@@ -12,12 +12,14 @@ const WorkReport = require('../models/workreport');
 const AssignWork = require('../models/assignwork');
 const Work = require('../models/work');
 const QueryandReply = require('../models/queryandreply');
+const course = require('../models/course');
+const AllocatedCourse = require('../models/allocatedcourses');
 
 var dt=Date.now();
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/work');
+    cb(null, 'uploads/work/');
   },
   filename: (req, file, cb) => {
     cb(null, dt + '-' + file.originalname);
@@ -54,7 +56,7 @@ router.post('/Assignwk_',upload.single('fileField'),checkAuth, async function(re
   var work_title = request.body.textfield;
   var work1 = request.body.textarea;
   var attach_file= request.file.fileField;
-  var file = '/uploads/work'+dt + '-' +request.file.originalname ;
+  var file = '/uploads/work/'+dt + '-' +request.file.originalname ;
   var sub_date = request.body.textfield3;
   var intern_data =  request.body.Interns;
   var i;
@@ -79,12 +81,13 @@ router.post('/Assignwk_',upload.single('fileField'),checkAuth, async function(re
         intern_id: i,
         assign_date: Assign_date,
       }
+
       const AW = new AssignWork(assgnwk);
       const savedAW = await AW.save();
       // const intern = await Intern.find({ _id: i.intern_id });
       // const me = await Mentor.find({ _id: i.mentor_id });
     } catch (error) {
-      console.log('Error fetching mentor:', error);
+      console.log('Error fetching mentor [;poīñṭdk.lj,hugytfrdesdjkhgjyftdcv]:', error);
       
     }
   }
@@ -96,6 +99,7 @@ router.post('/Assignwk_',upload.single('fileField'),checkAuth, async function(re
       work_id: savedW._id ,
       intern_id: intern_data,
       assign_date: Assign_date,
+      status : "Pending", 
     }
     const AW = new AssignWork(assgnwk);
     const savedAW = await AW.save();
@@ -114,10 +118,24 @@ router.post('/Assignwk_',upload.single('fileField'),checkAuth, async function(re
 
 
 
-router.get('/evaluationandfeedback',checkAuth, function(req, res, next) {
-  res.render('mentor/evalandfeedback', { title: 'Register'});
+router.get('/evaluationandfeedback/:a_work',checkAuth,async function(req, res, next) {
+  const Awork_data = await AssignWork.find({_id:req.params.a_work,});
+  const work_data = await Work.find({_id:Awork_data[0]['work_id'],});
+
+  var alloc =[];
+  const workreport = await WorkReport.find({assign_workid:req.params.a_work,});
+  console.log(workreport);
+  atFile = 'No';
+  if (workreport.length != 0){
+    atFile=workreport[0].attach_file
+  }
+  alloc.push({'Work_Title':work_data[0].workk_name,'View':atFile,});
+
+  console.log([alloc[0].View]);
+  res.render('mentor/evalandfeedback', { title: 'Register',ef:alloc,'assignwork_id':req.params.a_work });
 });
 router.post('/evalandfback',checkAuth, async function(request, response, next){
+  var assignwork_id= request.body.assignwork_id;
   var score = request.body.textfield;
   var feedback = request.body.textarea;
   console.log(score);
@@ -127,13 +145,103 @@ router.post('/evalandfback',checkAuth, async function(request, response, next){
     
   evaluation_score: score,
   feedback: feedback,
-   
   }
   
-  const evalfeed = new WorkReport(item);
+  const evalfeed = await WorkReport.find({assign_workid:assignwork_id}).findOneAndUpdate(item);
   const savedC = await evalfeed.save();
-  response.send(savedC);
-  response.redirect("/evaluationandfeedback");
+
+
+
+  const  data = await AssignWork.find({_id : assignwork_id})
+  response.redirect("/viewassignedworkintern/"+data[0]["work_id"]);
+});
+
+router.get('/evaluatedresults',checkAuth,async function(req, res, next) {
+
+  const mentdat = await Mentor.find({Mentor_id:req.session.log_id});
+  const work = await Work.find({mentor_id:req.session.log_id});
+  const assignwrk = await AssignWork.find({});
+
+  var allocs=[];
+  // console.log(work);
+  for (const i of work) {
+   for(const j of  assignwrk) {
+    if(j.work_id == i._id ){
+      //console.log("hello");
+      const workreport = await WorkReport.find({assign_workid:j._id});
+      const intern = await Intern.find({_id:j.intern_id});
+      console.log(intern);
+      try {
+        allocs.push({
+          'id':j._id,
+        'workk_name':i.workk_name,
+        'assign_date':i.assign_date,
+        'View':i.attach_file,
+        'score':workreport[0].evaluation_score,
+        'feedback':workreport[0].feedback,
+        'intern':intern[0].Name,
+        'submission_date':i.submission_date,
+        
+      });
+      } catch (error) {
+      //   allocs.push({
+      //     'assign_date':work[0].assign_date,
+      //   'workk_name':i.workk_name,
+      //   'View':i.attach_file,
+      //   'score':'not yet updated',
+      //   'feedback':'not yet updated',
+      //   'intern':'not yet allocated',
+      //   'submission_date':i.submission_date,
+        
+      // });
+      }
+      
+    }
+   }
+
+}
+// console.log(allocs +' lkoijhgfbk,jmuyhfgtk,ljmuhygtfk,jmhg');
+res.render('mentor/evaluatedresults', { title: 'Register', mnn: allocs});
+});
+
+//repeat of evaluvate
+
+router.get('/evaluationandfeedback_evalresult/:a_work',checkAuth,async function(req, res, next) {
+  const Awork_data = await AssignWork.find({_id:req.params.a_work,});
+  const work_data = await Work.find({_id:Awork_data[0]['work_id'],});
+
+  var alloc =[];
+  const workreport = await WorkReport.find({assign_workid:req.params.a_work,});
+  console.log(workreport);
+  atFile = 'No';
+  if (workreport.length != 0){
+    atFile=workreport[0].attach_file
+  }
+  alloc.push({'Work_Title':work_data[0].workk_name,'View':atFile,});
+
+  console.log([alloc[0].View]);
+  res.render('mentor/evaluationandfeedback_evalresult', { title: 'Register',ef:alloc,'assignwork_id':req.params.a_work });
+});
+router.post('/evalandfback_evalresult',checkAuth, async function(request, response, next){
+  var assignwork_id= request.body.assignwork_id;
+  var score = request.body.textfield;
+  var feedback = request.body.textarea;
+  console.log(score);
+  console.log(feedback);
+
+  var item = {
+    
+  evaluation_score: score,
+  feedback: feedback,
+  }
+  
+  const evalfeed = await WorkReport.find({assign_workid:assignwork_id}).findOneAndUpdate(item);
+  const savedC = await evalfeed.save();
+
+
+
+  const  data = await AssignWork.find({_id : assignwork_id})
+  response.redirect("/evaluatedresults");
 });
 
 
@@ -168,16 +276,64 @@ router.post('/changepassm',checkAuth, async function(request, response, next){
 });
 
 
-router.get('/internmonitoring',checkAuth, function(req, res, next) {
-  res.render('mentor/internmonitoring', { title: 'Register'});
+router.get('/internmonitoring',checkAuth,async function(req, res, next) {
+  const docs = await Mentor.find({ Mentor_id :req.session.log_id, });
+  const docs1 = await Allocation.find({mentor_id: docs[0]["_id"]});
+
+  const docs3 = await Work.find({mentor_id: req.session.log_id});
+  var intName=[];
+  // console.log(docs3);
+  for(const doc of docs3){
+    try {
+
+
+      const docs2 = await AssignWork.find({work_id: doc["_id"]});
+      // console.log(docs2);
+      for(const d of docs2)
+      {
+        try {
+          const work= await  Work.find({_id:d["work_id"]});
+          
+          const indoc = await Intern.find({_id: d["intern_id"]});
+          // console.log(indoc[0]);
+          intName.push({'id':d['_id'],'Name':indoc[0]['Name'], 'work_title':doc['workk_name'],'status':d['status']});
+          
+        } catch (error) {
+          // console.log(error);
+        }
+      }
+      
+    } catch (error) {
+      console.log('');
+      
+    }
+  }
+
+  res.render('mentor/internmonitoring', { title: 'Register',mnn:intName});
 });
 router.post('/intermon', async function(request, response, next){
-  var search = request.body.textfield;
-  var interns = request.body.textfield;
-  var work_assigned = request.body.textarea;  
-  var status = request.body.textarea;
-  var work_report = request.body.textarea;
-  console.log(search);
+  // var search = request.body.textfield;
+  var interns = request.body.checkbox2;
+  // var work_assigned = request.body.textarea;  
+ 
+  if (Array.isArray(interns)) {
+   
+    for ( i of interns) {
+    try {
+      // console.log(i);
+      var assgnwk = {
+        status: 'completed',
+      }
+
+      const AW = await AssignWork.find({_id:i}).findOneAndUpdate(assgnwk);
+      // const intern = await Intern.find({ _id: i.intern_id });
+      // const me = await Mentor.find({ _id: i.mentor_id });
+    } catch (error) {
+      console.log('Error fetching mentor [;poīñṭdk.lj,hugytfrdesdjkhgjyftdcv]:', error);
+      
+    }
+  }
+}
 
   response.redirect("/internmonitoring");
 });
@@ -311,6 +467,155 @@ router.post('/mentor_viewassignedwork_post', async function(request, response, n
 });
 
 
+router.get('/myassignedinterns',checkAuth,async function(req, res, next) {
+
+  const mentdat = await Mentor.find({Mentor_id:req.session.log_id});
+  const allocation = await Allocation.find({mentor_id:mentdat[0]._id});
+
+  var allocs=[];
+  // console.log(work);
+  for (const i of allocation) {
+      //console.log("hello");
+      const intern = await Intern.find({_id:i.intern_id});
+      console.log(intern);
+      try {
+        allocs.push({
+          'id':intern[0]._id,
+          'intern':intern[0].Name,
+          'photo':intern[0].Photo,
+        
+      });
+      } catch (error) {
+        console.log(error);
+    }
+
+}
+// console.log(allocs +' lkoijhgfbk,jmuyhfgtk,ljmuhygtfk,jmhg');
+res.render('mentor/myassignedinterns', { title: 'Register', mnn: allocs});
+});
+
+
+router.get('/generatereport/:Int_id',checkAuth,async function(req, res, next) {
+
+  const mentdat = await Mentor.find({Mentor_id:req.session.log_id});
+  const work = await Work.find({mentor_id:req.session.log_id});
+  const assignwrk = await AssignWork.find({});
+  const intern = await Intern.find({_id:req.params.Int_id});
+  const allocatecourse = await AllocatedCourse.find({intern_id:req.params.Int_id});
+  console.log(allocatecourse);
+  const courses = await course.find({_id:allocatecourse[0].course_id});
+  
+
+  var allocs=[];
+  // console.log(work);
+  for (const i of work) {
+   for(const j of  assignwrk) {
+    if(j.work_id == i._id && j.intern_id== req.params.Int_id){
+      //console.log("hello");
+      const workreport = await WorkReport.find({assign_workid:j._id});
+      console.log(intern);
+      try {
+        allocs.push({
+          'id':j._id,
+        'workk_name':i.workk_name,
+        'assign_date':i.assign_date,
+        'View':i.attach_file,
+        'score':workreport[0].evaluation_score,
+        'feedback':workreport[0].feedback,
+        'intern':intern[0].Name,
+        'submission_date':i.submission_date,
+        
+      });
+      } catch (error) {   
+      }
+      
+    }
+   }
+
+}
+
+
+var totalScore = 0;
+  var numAllocs = 0;
+  
+  for (const alloc of allocs) {
+    totalScore += parseInt(alloc.score);
+    numAllocs++;
+  }
+  
+  var averageScore = totalScore / numAllocs;
+
+console.log(totalScore +' lkoijhgfbk,jmuyhfgtk,ljmuhygtfk,jmhg');
+console.log(averageScore +' lkoijhgfbk,jmuyhfgtk,ljmuhygtfk,jmhg');
+res.render('mentor/generatereport', { title: 'Register', mnn: allocs,
+    Int_id:req.params.Int_id, 
+    intname:intern[0].Name,
+    photo:intern[0].Photo,
+    mentname:mentdat[0].Name,
+    averageScore:averageScore,
+    course:courses[0].course_name,
+    Duration:courses[0].duration });
+});
+
+//repeat of generate report
+
+
+router.post('/generatereportpost',checkAuth,async function(req, res, next) {
+
+  var Int_id = req.body.Int_id;
+  var fromdate = req.body.fromdate;
+  var todate = req.body.todate;
+  var Date = req.body.Date;
+
+  const work = await Work.find({mentor_id:req.session.log_id});
+  const assignwrk = await AssignWork.find({});
+  const intern = await Intern.find({_id:Int_id});
+
+  var allocs=[];
+  // console.log(work);
+  for (const i of work) {
+   for(const j of  assignwrk) {
+    if(j.work_id == i._id && j.intern_id== Int_id){
+      //console.log("hello");
+      const workreport = await WorkReport.find({assign_workid:j._id});
+      try {
+        if(i.assign_date >= fromdate && i.assign_date <= todate && Date == 'assign_date' ) {
+        allocs.push({
+          'id':j._id,
+        'workk_name':i.workk_name,
+        'assign_date':i.assign_date,
+        'View':i.attach_file,
+        'score':workreport[0].evaluation_score,
+        'feedback':workreport[0].feedback,
+        'intern':intern[0].Name,
+        'submission_date':i.submission_date,
+        
+      });}
+      if(i.assign_date >= fromdate && i.assign_date <= todate && Date == 'submission_date' ) {
+        allocs.push({
+          'id':j._id,
+        'workk_name':i.workk_name,
+        'assign_date':i.assign_date,
+        'View':i.attach_file,
+        'score':workreport[0].evaluation_score,
+        'feedback':workreport[0].feedback,
+        'intern':intern[0].Name,
+        'submission_date':i.submission_date,
+        
+      });}
+      } catch (error) {
+      
+      }
+      
+    }
+   }
+
+}
+// console.log(allocs +' lkoijhgfbk,jmuyhfgtk,ljmuhygtfk,jmhg');
+res.render('mentor/generatereport', { title: 'Register', mnn: allocs, Int_id:Int_id});
+});
+
+
 router.get('/viewassignedworkintern/:workid', async function(req, res, next) {
   const intern = await AssignWork.find({ work_id:req.params.workid});
   var alloc=[];
@@ -323,7 +628,7 @@ router.get('/viewassignedworkintern/:workid', async function(req, res, next) {
       console.error('Error fetching mentor:', error);
     }
   }
-  console.log(intern);
+  // console.log(intern);
   res.render('mentor/viewassignedintern', { title: 'Register', mnn: alloc});
 });
 router.post('/viewassignedintern', async function(request, response, next){

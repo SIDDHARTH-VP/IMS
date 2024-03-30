@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignments</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%; /* Adjust for responsive layout */
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Assigned Interns</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Intern</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+    <% var counter =1;
+    mnn.forEach(i=> { %>
+      <tr>
+        <td><%= counter %></td>
+        <td> <%= i.intern %></td>
+          
+          <td colspan="2" style="text-align: center;"><img name="Photo" height="150px" src="<%= i.photo %>" alt="Intern Photo" /></td>
+        <td> <a href='/generatereport/<%=i.id%>'>Generate Report</a></td>
+      </tr>
+    <% counter++;
+    }); %>
+      </tbody>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignments</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%; /* Adjust for responsive layout */
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Assignments</h1>
+  <h2>View Assignment Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Assigned Date</th>
+        <th>Assignment Title</th>
+        <th>Submission Date</th>
+        <th>Intern</th>
+
+        <th>Feedback</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% var counter =1;
+    mnn.forEach(i=> { %>
+      <tr>
+        <td><%= counter %></td>
+        <td><%= i.assign_date %></td>
+        <td><%= i.workk_name %></td>
+        <td><%= i.submission_date %></td>
+        <td><%= i.intern %></td>
+        <td><%= i.feedback %></td>
+        <td>
+          <% if (i.score == 'Pending') {%>
+            <a href='/evaluationandfeedback_evalresult/<%=i.id%>'>Evaluate</a>
+          
+
+          <%} else{ %>
+            <%= i.score %>
+
+            <% } %>
+        </td>
+      </tr>
+    <% counter++;
+    }); %>
+      </tbody>
+  </table>
+
+</body>
+</html>

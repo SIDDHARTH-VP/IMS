@@ -5,7 +5,10 @@ const WorkSchema = new mongoose.Schema({
   work_id: String,
   intern_id: String,
   assign_date: String,
-
+status :{
+  type: String,
+  default: 'pending'
+},
 
 });
 

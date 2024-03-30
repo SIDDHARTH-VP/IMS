@@ -10,7 +10,8 @@
   <table border="1">
     <tr>
       <td><input type="text" name="textfield"></td>
-      <td><input type="submit" value="Search"></td>
+      <td><input type="submit" value="Search" name="Search"></td>
+      <td><input type="submit" value="Confirm" name="confirm"></td>
     </tr>
   </table>
   <table width="200" border="1">
@@ -20,17 +21,30 @@
     <td>Interns</td>
     <td>Work Assigned</td>
     <td>Status</td>
-    <td>Work Report</td>
 
   </tr>
+
   <tr>
-    <td>&nbsp;</td>
-    <td>&nbsp;</td>
-    <td></td>
-    <td><label>
-      <input type="checkbox" name="checkbox2" id="checkbox2" />
-      Completed</label></td>
-    <td><a href="#">Generate</a></td>
+    <% var counter =1;
+  mnn.forEach(i=> { %>
+  
+   
+    <td>&nbsp;<%= counter %></td>
+    <td>&nbsp;<%= i.Name %></td>
+    <td >&nbsp;<%= i.work_title %></td>
+    <td>
+      <% if (i.status == "pending"){ %>
+      <label>
+      <input type="checkbox" onclick="return confirm('Are you sure?')"  name="checkbox2" value="<%= i.id %>" id="checkbox2" /><%= i.status %></label>
+      <% } else {%>
+        <%= i.status %>
+      <%} %>
+    </td>
+    
+  </tr>
+  <% counter++;
+}); %>
+    
 
   </tr>
 </table>

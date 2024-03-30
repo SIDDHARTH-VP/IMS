@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignments</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%; /* Adjust for responsive layout */
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Assignments</h1>
+  <h2>View Assignment Details</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Assigned Date</th>
+        <th>Assignment Title</th>
+        <th>Description</th>
+        <th>Submission Date</th>
+        <th>File</th>
+        <th>Score</th>
+        <th>Feedback</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% var counter =1;
+    mnn.forEach(i=> { %>
+      <tr>
+        <td><%= counter %></td>
+        <td><%= i.assign_date %></td>
+        <td><%= i.workk_name %></td>
+        <td><%= i.work %></td>
+        <td><%= i.submission_date%></td>
+        <td><a href="<%= i.View %>">Download Attachment</a></td>
+        <td><%= i.score %></td>
+        <td><%= i.feedback %></td>
+      </tr>
+    <% counter++;
+    }); %>
+      </tbody>
+  </table>
+  <div id="assignment-details">
+    <h3>Additional message</h3>
+    <p>Answer</p>
+    <form action="/assignmentsubmission" method="post" enctype="multipart/form-data">
+      <input  type="hidden" name="id" value="<%= assignedwork_id %>">
+      <label for="answer">Answer:</label>
+      <textarea id="answer" name="answer" rows="10" cols="50"></textarea><br>
+      <label for="attachment">Attach File :</label>
+      <input type="file" id="attachment" name="attachment"><br>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+</body>
+</html>

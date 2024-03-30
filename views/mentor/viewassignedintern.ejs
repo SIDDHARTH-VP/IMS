@@ -24,7 +24,8 @@
     
     <td>&nbsp;<%= i.Intern_Name %></td>
     <td><img name="Photo" src="<%= i.Photo %>" alt="Intern Photo"  height="100px" width="100px" /></td>
-      
+    <td> <a href='/evaluationandfeedback/<%=i.id%>'>Evaluate</a></td>
+
   </tr>
   <% counter++;
 }); %></table>

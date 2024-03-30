@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 // Define a schema for your data
 const WorkreportSchema = new mongoose.Schema({
-  workreport_id: String,
-  work_id: String,
-
+  assign_workid: String,
+  submission_date: String,
   work_content: String,
+  attach_file: String,
   evaluation_score: String,
   feedback: String,
 

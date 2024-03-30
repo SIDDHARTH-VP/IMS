@@ -45,9 +45,72 @@ router.get('/Internhome',checkAuth, function(req, res, next) {
     response.redirect("/assignmentsubmission");
   });
   
+  router.get('/assignmentdetails/:assignedwork_id', checkAuth, async function(req, res, next) {
+    const Intdat = await Intern.find({Inter_id:req.session.log_id});
+    const alloc= await Allocation.find({intern_id:Intdat[0]._id});
+    const assignwrk = await AssignWork.find({_id:req.params.assignedwork_id});
+    var allocs=[];
+    console.log(assignwrk +' lkoijhgfbk,jmuyhfgtk,ljmuhygtfk,jmhg');
+    for (const i of assignwrk) {
+    
+      const work = await Work.find({_id:i.work_id});
+
+      const workreport = await WorkReport.find({assign_workid:req.params.assignedwork_id});
+
+      try {
+        allocs.push({'assign_date':work[0].assign_date,
+      'workk_name':work[0].workk_name,
+      'View':work[0].attach_file,
+      'score':workreport[0].evaluation_score,
+      'feedback':workreport[0].feedback,
+      'description':work[0].work,'work':work[0].work,
+      'submission_date':work[0].submission_date});
+      } catch (error) {
+        allocs.push({'assign_date':work[0].assign_date,
+      'workk_name':work[0].workk_name,
+      'View':work[0].attach_file,
+      'score':'Not yet updated',
+      'feedback':'Not yet updated',
+      'description':work[0].work,'work':work[0].work,
+      'submission_date':work[0].submission_date});
+      }
+      
+
+
+  }
+
+  // console.log(allocs);
+    res.render('intern/assignmentdetails', { title: 'Register',mnn:allocs,'assignedwork_id':req.params.assignedwork_id});
+  });
   
+  router.post('/assigndetail',checkAuth, async function(request, response, next){
+
+  
+    response.redirect("/assignmentdetails");
+  });
+
+
+  router.post('/assignmentsubmission',upload.single('attachment'),checkAuth, async function(request, response, next){
+    var work_content = request.body.answer;
+    var attach_file= request.file.attachment;
+    var file = '/uploads/work'+dt + '-' +request.file.originalname ;
+    var sub_date = new Date().toISOString().split('T')[0];
+    var item = {
+      assign_workid: request.body.id ,
+      submission_date: sub_date,
+      attach_file : file,
+      work_content: work_content,
+      evaluation_score: "Pending",
+      feedback: "Pending",
+    }
+    const submitQ = new WorkReport(item);
+    const savedC = await submitQ.save();
+    response.send("<script>alert('Assignment Submitted sucessfully');window.location='/assignmentdetails/"+request.body.id+"'</script>")
+  });
+
+
   router.get('/internfeedback',checkAuth, function(req, res, next) {
-    res.render('intern/internfeedback', { title: 'Register'});
+    res.render('intern/internfeedback', { title: 'Register'})
   });
   router.post('/intfeed', async function(request, response, next){
     var Search = request.body.textfield;
@@ -113,7 +176,8 @@ router.get('/Internhome',checkAuth, function(req, res, next) {
   for (const i of assignwrk) {
     
       const work = await Work.find({_id:i.work_id});
-      allocs.push({'assign_date':work[0].assign_date,'workk_name':work[0].workk_name,'work':work[0].work,'submission_date':work[0].submission_date});
+      console.log(work[0]);
+      allocs.push({'_id':i._id,'assign_date':work[0].assign_date,'workk_name':work[0].workk_name,'work':work[0].work,'submission_date':work[0].submission_date});
   }
 
   console.log(allocs);

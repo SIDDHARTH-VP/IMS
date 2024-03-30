@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignments</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%; /* Adjust for responsive layout */
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 1rem;
+}
+
+.profile-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+form {
+  width: 50%;
+  margin: 0 auto;
+}
+  </style>
+</head>
+<body>
+
+    <div class="profile-container">
+        <img src="<%= photo %>" alt="Profile picture" class="profile-image">
+        <div class="profile-name"><%= intname %></div>
+        <div class="profile-name">Mentor:<%= mentname %></div>
+        <div class="profile-name">Course: <%= course %></div>
+        <div class="profile-name">Duration: <%= Duration %></div>
+
+      </div>
+      
+      <form>
+        <!-- form elements go here -->
+      </form>
+  <form action="/generatereportpost" method="post">
+    <input type = "hidden" name = "Int_id" value = "<%= Int_id %>">
+    <input type = "date" name = "fromdate">
+  <input type = "date" name = "todate"> 
+  <button>Search</button>
+  <input type = "radio" checked name = "Date" value ="assign_date">Assigned Date
+  <input type = "radio" name = "Date" value ="submission_date">Submission Date
+
+  </form>
+  <table>
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Assigned Date</th>
+        <th>Assignment Title</th>
+        <th>Submission Date</th>
+
+        <th>Feedback</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% var counter =1;
+    mnn.forEach(i=> { %>
+      <tr>
+        <td><%= counter %></td>
+        <td><%= i.assign_date %></td>
+        <td><%= i.workk_name %></td>
+        <td><%= i.submission_date %></td>
+        <td><%= i.feedback %></td>
+        <td>
+          <% if (i.score == 'Pending') {%>
+            <a href='/evaluationandfeedback_evalresult/<%=i.id%>'>Evaluate</a>
+          
+
+          <%} else{ %>
+            <%= i.score %>
+
+            <% } %>
+        </td>
+      </tr>
+    <% counter++;
+    }); %>
+    <tr>
+<td colspan="6"><%= averageScore %></td>
+    </tr>
+      </tbody>
+  </table>
+
+</body>
+</html>
